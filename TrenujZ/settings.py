@@ -158,3 +158,7 @@ NPM_BIN_PATH = env('NPM_BIN_PATH')
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+# Login configuration
+LOGIN_REDIRECT_URL = "/login"
+LOGIN_URL = "/login"

@@ -1,7 +1,6 @@
-import hashlib
-import os
-from datetime import date
 from django.db import models
+from django.contrib.auth.models import User, Group
+from django.utils import timezone
 
 
 def exercise_tag_directory_path(instance, filename):
@@ -55,3 +54,26 @@ class Exercise(models.Model):
     def __str__(self):
         return self.title
 
+
+def person_directory_path(instance, filename):
+    return f'user/{instance.id}/{filename}'
+
+
+class UserData(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    image = models.ImageField(upload_to=person_directory_path, blank=True, null=True)
+
+    is_trainer = models.BooleanField(default=False)
+    trainer = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="trainees")
+    client_group = models.OneToOneField(Group, null=True, blank=True, on_delete=models.SET_NULL)
+
+    is_active = models.BooleanField(default=True)
+    is_hidden = models.BooleanField(default=False)
+    active_until = models.DateField(blank=True, null=True)
+
+    def is_account_active(self):
+        if self.is_hidden:
+            return False
+        if self.active_until and self.active_until < timezone.now().date():
+            return False
+        return self.is_active
