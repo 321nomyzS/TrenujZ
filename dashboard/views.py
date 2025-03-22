@@ -304,6 +304,9 @@ def login_page(request):
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
 
+        if not user.is_staff and not user.is_superuser:
+            messages.error(request, "Nie masz uprawnień")
+            return render(request, 'login.html')
         if user:
             login(request, user)
             return redirect('home')
