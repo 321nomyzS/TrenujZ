@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.utils import timezone
 
 
@@ -61,11 +61,10 @@ def person_directory_path(instance, filename):
 
 class UserData(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    image = models.ImageField(upload_to=person_directory_path, blank=True, null=True)
+    image = models.ImageField(upload_to=person_directory_path, default='default/user.jpg')
 
     is_trainer = models.BooleanField(default=False)
     trainer = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="trainees")
-    client_group = models.OneToOneField(Group, null=True, blank=True, on_delete=models.SET_NULL)
 
     is_active = models.BooleanField(default=True)
     is_hidden = models.BooleanField(default=False)

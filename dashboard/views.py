@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.conf import settings
 from dashboard.models import *
+from datetime import datetime
 
 import shutil
 import hashlib
@@ -162,24 +163,138 @@ def delete_tag(request, id):
     return redirect('show_tags')
 
 
-def add_client(request):
-    pass
+@login_required
+def add_user(request):
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        status = request.POST.get('status')
+        active_until_raw = request.POST.get('active_until')
+
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+        user.save()
+
+        profile, _ = UserData.objects.get_or_create(user=user)
+
+        profile.trainer = request.user
+
+        if status == "active":
+            profile.is_active = True
+        elif status == "inactive":
+            profile.is_active = False
+        else:
+            profile.is_active = True
+
+        if active_until_raw != "":
+            profile.active_until = datetime.strptime(active_until_raw, "%Y-%m-%d").date()
+
+        if request.FILES:
+            image = request.FILES['photo']
+
+            if image:
+                md5 = hashlib.md5()
+                for chunk in image.chunks():
+                    md5.update(chunk)
+                file_hash = md5.hexdigest()
+
+                extension = os.path.splitext(image.name)[1]
+                new_name = f"{file_hash}{extension}"
+                image.name = new_name
+
+                profile.image = image
+        profile.save()
+
+        messages.success(request, "Użytkownik został dodany pomyślnie")
+        return redirect('show_users')
+
+    return render(request, 'add_user.html')
 
 
-def edit_client(request, id):
-    pass
+@login_required
+def edit_user(request, id):
+    user = User.objects.get(id=id)
+
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        status = request.POST.get('status')
+        active_until_raw = request.POST.get('active_until')
+
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        if password:
+            user.set_password(password)
+
+        user.save()
+
+        profile, _ = UserData.objects.get_or_create(user=user)
+
+        if status == "active":
+            profile.is_active = True
+        elif status == "inactive":
+            profile.is_active = False
+        else:
+            profile.is_active = True
+
+        if active_until_raw != "":
+            profile.active_until = datetime.strptime(active_until_raw, "%Y-%m-%d").date()
+
+        if request.FILES:
+            image = request.FILES['photo']
+
+            if image:
+                md5 = hashlib.md5()
+                for chunk in image.chunks():
+                    md5.update(chunk)
+                file_hash = md5.hexdigest()
+
+                extension = os.path.splitext(image.name)[1]
+                new_name = f"{file_hash}{extension}"
+                image.name = new_name
+                profile.image.delete()
+
+                profile.image = image
+        profile.save()
+
+        messages.success(request, "Użytkownik został zaktualizowany pomyślnie")
+        return redirect('show_users')
+    return render(request, "edit_user.html", {"client": user})
 
 
-def show_clients(request):
-    pass
+@login_required
+def show_users(request):
+    users = User.objects.filter(profile__trainer=request.user).filter(profile__is_hidden=0)
+
+    return render(request, 'show_users.html', {"users": users})
 
 
-def show_client(request, id):
-    pass
+@login_required
+def show_user(request, id):
+    user = User.objects.get(id=id)
+
+    return render(request, "show_user.html", {"client": user})
 
 
-def delete_client(request, id):
-    pass
+@login_required
+def delete_user(request, id):
+    user = User.objects.get(id=id)
+    profile = user.profile
+
+    profile.is_hidden = True
+    profile.save()
+
+    return redirect('show_users')
 
 
 @csrf_protect
