@@ -92,7 +92,7 @@ def add_tag(request):
     if request.method == 'POST':
         new_tag_category = request.POST['tag-category']
         tag_name = request.POST['name']
-        new_tag = Tag(name=tag_name, category_id=new_tag_category)
+        new_tag = Tag(name=tag_name, category_id=new_tag_category, created_by=request.user)
         new_tag.save()
 
         if request.FILES:
