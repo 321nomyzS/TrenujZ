@@ -11,28 +11,135 @@ import shutil
 import hashlib
 import os
 
+
 def home(request):
     return render(request, 'base.html')
 
 
+@login_required
 def add_exercise(request):
-    pass
+    tags = Tag.objects.filter(created_by=request.user)
+    tags_category = TagCategory.objects.all()
+    languages = ExerciseLanguage.objects.all()
+
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        language_name = request.POST.get('language')
+        video_link = request.POST.get('video_link')
+        html_content = request.POST.get('html_content')
+        selected_tag_ids = request.POST.getlist('tags')
+
+        exercise = Exercise(
+            title=title,
+            video_link=video_link,
+            html_content=html_content,
+            created_by=request.user
+        )
+
+        language = ExerciseLanguage.objects.get(name=language_name)
+        exercise.language = language
+        exercise.save()
+
+        if selected_tag_ids:
+            selected_tags = Tag.objects.filter(id__in=selected_tag_ids, created_by=request.user)
+            exercise.tags.set(selected_tags)
+
+        if request.FILES:
+            image = request.FILES['image']
+
+            if image:
+                md5 = hashlib.md5()
+                for chunk in image.chunks():
+                    md5.update(chunk)
+                file_hash = md5.hexdigest()
+
+                extension = os.path.splitext(image.name)[1]
+                new_name = f"{file_hash}{extension}"
+                image.name = new_name
+
+                exercise.image = image
+        exercise.save()
+
+        messages.success(request, "Ćwiczenie zostało dodane pomyślnie")
+        return redirect('show_exercises')
+
+    return render(request, 'add_exercise.html', {"tags": tags, "tags_category": tags_category, "languages": languages})
 
 
+@login_required
 def show_exercises(request):
-    pass
+    exercises = Exercise.objects.filter(created_by=request.user)
+
+    return render(request, "show_exercises.html", {"exercises": exercises})
 
 
+@login_required
 def show_exercise(request, id):
-    pass
+    exercise = Exercise.objects.get(id=id)
+    tags_category = TagCategory.objects.all()
+    tags = Tag.objects.filter(created_by=request.user)
+
+    return render(request, "show_exercise.html", {"exercise": exercise, "tags_category": tags_category, "tags": tags})
 
 
+@login_required
 def edit_exercise(request, id):
-    pass
+    exercise = Exercise.objects.get(id=id)
+    tags = Tag.objects.filter(created_by=request.user)
+    tags_category = TagCategory.objects.all()
+    languages = ExerciseLanguage.objects.all()
+
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        language_name = request.POST.get('language')
+        video_link = request.POST.get('video_link')
+        html_content = request.POST.get('html_content')
+        selected_tag_ids = request.POST.getlist('tags')
+
+        exercise.title = title
+        exercise.video_link = video_link
+        exercise.html_content = html_content
+
+        language = ExerciseLanguage.objects.get(name=language_name)
+        exercise.language = language
+        exercise.save()
+
+        selected_tags = Tag.objects.filter(id__in=selected_tag_ids, created_by=request.user)
+        exercise.tags.set(selected_tags)
+
+        if request.FILES:
+            image = request.FILES['image']
+
+            if image:
+                md5 = hashlib.md5()
+                for chunk in image.chunks():
+                    md5.update(chunk)
+                file_hash = md5.hexdigest()
+
+                extension = os.path.splitext(image.name)[1]
+                new_name = f"{file_hash}{extension}"
+                image.name = new_name
+                exercise.image.delete()
+
+                exercise.image = image
+        exercise.save()
+
+        messages.success(request, "Ćwiczenie zostało zaktualizowane pomyślnie")
+        return redirect('show_exercises')
+
+    return render(request, 'edit_exercise.html', {"exercise": exercise, "tags": tags, "tags_category": tags_category, "languages": languages})
 
 
+@login_required
 def delete_exercise(request, id):
-    pass
+    exercise = Exercise.objects.get(id=id)
+
+    if exercise.image:
+        shutil.rmtree(os.path.dirname(os.path.join(settings.MEDIA_ROOT, exercise.image.path)))
+    exercise.delete()
+
+    messages.success(request, "Ćwiczenie zostało usunięte pomyślnie")
+    return redirect('show_exercises')
 
 
 def add_training(request):

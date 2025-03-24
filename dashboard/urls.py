@@ -4,7 +4,7 @@ import dashboard.views as views
 urlpatterns = [
     path('', views.home, name='home'),
     path('exercise/add', views.add_exercise, name='add_exercise'),
-    path('exercise', views.show_exercises, name='show_exercise'),
+    path('exercise', views.show_exercises, name='show_exercises'),
     path('exercise/<id>', views.show_exercise, name='show_exercise'),
     path('exercise/delete/<id>/', views.delete_exercise, name='delete_exercise'),
     path('edit_exercise/<id>/', views.edit_exercise, name='edit_exercise'),

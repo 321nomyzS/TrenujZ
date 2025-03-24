@@ -27,7 +27,7 @@
                             </svg>
                             Dodaj nowe ćwiczenie
                         </a>
-                        <a href="{% url 'show_exercise' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700">
+                        <a href="{% url 'show_exercises' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg>
                             Pokaż ćwiczenia
                         </a>
@@ -119,5 +119,6 @@
                 </div>
             </div>
         </div>
+    {% block end_file %}{% endblock %}
 	</body>
 </html>

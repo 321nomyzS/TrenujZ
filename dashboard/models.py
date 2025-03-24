@@ -29,10 +29,10 @@ class Tag(models.Model):
 
 
 class ExerciseLanguage(models.Model):
-    language_name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
-        return self.language_name
+        return self.name
 
 
 def exercise_directory_path(instance, filename):
@@ -41,7 +41,6 @@ def exercise_directory_path(instance, filename):
 
 class Exercise(models.Model):
     title = models.CharField(max_length=100)
-    short_description = models.TextField()
     image = models.ImageField(upload_to=exercise_directory_path, blank=True, null=True)
     video_link = models.URLField(blank=True, null=True)
     html_content = models.TextField()
