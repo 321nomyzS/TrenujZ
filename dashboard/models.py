@@ -77,3 +77,53 @@ class UserData(models.Model):
         if self.active_until and self.active_until < timezone.now().date():
             return False
         return self.is_active
+
+
+def workout_directory_path(instance, filename):
+    return f'workout/{instance.id}/{filename}'
+
+
+class Workout(models.Model):
+    title = models.CharField(max_length=100)
+    is_personal = models.BooleanField(default=False)
+    visibility = models.BooleanField(default=False)
+
+    workout_date = models.DateField(blank=True, null=True)
+    client = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='workouts')
+
+    image = models.ImageField(upload_to=workout_directory_path, blank=True, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_workouts')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{'Personal' if self.is_personal else 'General'} Workout: {self.title}"
+
+
+class WorkoutExercise(models.Model):
+    workout = models.ForeignKey(Workout, on_delete=models.CASCADE, related_name='workout_exercises')
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
+
+    tempo = models.TextField(blank=True, null=True)
+    rest_min = models.IntegerField(blank=True, null=True)
+    rest_sec = models.IntegerField(blank=True, null=True)
+
+    warmup_series = models.IntegerField(blank=True, null=True)
+    main_series = models.IntegerField(blank=True, null=True)
+    main_series_reps = models.CharField(blank=True, null=True, max_length=100)
+
+    warmup = models.JSONField(blank=True, null=True)
+    main = models.JSONField(blank=True, null=True)
+    comment = models.TextField(blank=True, null=True)
+
+    alter_exercise = models.ForeignKey(Exercise, on_delete=models.SET_NULL, null=True, blank=True, related_name='alternate_for')
+
+    def __str__(self):
+        return f"{self.exercise.title} in {self.workout.title}"
+
+
+class Config(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    value = models.TextField()
+
+    def __str__(self):
+        return f"{self.key} = {self.value}"

@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.conf import settings
+from django.utils.dateparse import parse_date
 from dashboard.models import *
 from datetime import datetime
 
@@ -142,40 +143,299 @@ def delete_exercise(request, id):
     return redirect('show_exercises')
 
 
+def _parse_json_reps(request, row_index, rep_type, max_series=4):
+    """
+    Zbiera powtórzenia z formularza i zwraca listę wartości jako JSON, np. [12, 10, 8]
+    """
+    reps = []
+    for i in range(1, max_series + 1):
+        key = f"{rep_type}-series-{i}-rep-{row_index}"
+        val = request.POST.get(key)
+        if val:
+            try:
+                reps.append(int(val))
+            except ValueError:
+                continue
+    return reps
+
+
 def add_training(request):
-    pass
+    exercises = Exercise.objects.filter(created_by=request.user)
+    clients = User.objects.filter(profile__trainer=request.user)
+
+    if request.method == 'POST':
+        post = request.POST
+        title = post.get('title', '')
+        is_personal = post.get('training-type') == 'personal'
+        visibility = post.get('visible-radio') == 'yes'
+        workout_date = parse_date(post.get('workout_date')) if is_personal else None
+
+        client_id = post.get('workout-person', None)
+        client = User.objects.get(id=client_id) if client_id is not None else None
+
+        workout = Workout.objects.create(
+            title=title,
+            is_personal=is_personal,
+            workout_date=workout_date,
+            client=client,
+            created_by=request.user,
+            visibility=visibility
+        )
+
+        if request.FILES:
+            image = request.FILES['image']
+
+            if image:
+                md5 = hashlib.md5()
+                for chunk in image.chunks():
+                    md5.update(chunk)
+                file_hash = md5.hexdigest()
+
+                extension = os.path.splitext(image.name)[1]
+                new_name = f"{file_hash}{extension}"
+                image.name = new_name
+                workout.image.delete()
+
+                workout.image = image
+        else:
+            workout.image = Config.objects.get("default_workout_image").value
+        workout.save()
+
+        try:
+            row_count = int(post.get('rowCount', '0'))
+        except ValueError:
+            row_count = 0
+
+        for i in range(1, row_count + 1):
+            exercise_id = post.get(f'exercise-id-{i}')
+            if not exercise_id:
+                continue
+
+            try:
+                exercise = Exercise.objects.get(pk=exercise_id)
+            except Exercise.DoesNotExist:
+                continue
+
+            tempo = post.get(f'tempo-{i}')
+            rest_min = post.get(f'rest-min-{i}')
+            rest_sec = post.get(f'rest-sec-{i}')
+            warmup_series = post.get(f'warmup-series-{i}')
+            main_series = post.get(f'main-series-{i}')
+            main_series_reps = post.get(f'main-series-reps-{i}')
+            comment = post.get(f'comment-{i}')
+            alter_exercise_id = post.get(f'alter-exercise-id-{i}')
+
+            warmup_json = _parse_json_reps(request, i, 'warmup')
+            main_json = _parse_json_reps(request, i, 'main')
+
+            alter_exercise = None
+            if alter_exercise_id:
+                try:
+                    alter_exercise = Exercise.objects.get(pk=alter_exercise_id)
+                except Exercise.DoesNotExist:
+                    pass
+
+            WorkoutExercise.objects.create(
+                workout=workout,
+                exercise=exercise,
+                tempo=tempo,
+                rest_min=int(rest_min) if rest_min else None,
+                rest_sec=int(rest_sec) if rest_sec else None,
+                warmup_series=int(warmup_series) if warmup_series else None,
+                main_series=int(main_series) if main_series else None,
+                main_series_reps=main_series_reps,
+                warmup=warmup_json,
+                main=main_json,
+                comment=comment,
+                alter_exercise=alter_exercise
+            )
+        messages.success(request, "Trening został dodany pomyślnie")
+        return redirect('show_trainings')
+
+    return render(request, 'add_training.html', {
+        "exercises": exercises,
+        "clients": clients
+    })
 
 
 def duplicate_training(request, id):
-    pass
+    original_workout = Workout.objects.get(id=id)
+
+    duplicated_workout = Workout.objects.create(
+        title=original_workout.title,
+        is_personal=original_workout.is_personal,
+        workout_date=original_workout.workout_date,
+        client=original_workout.client,
+        created_by=original_workout.created_by,
+        visibility=False
+    )
+
+    original_exercises = WorkoutExercise.objects.filter(workout=original_workout)
+    for original in original_exercises:
+        WorkoutExercise.objects.create(
+            workout=duplicated_workout,
+            exercise=original.exercise,
+            tempo=original.tempo,
+            rest_min=original.rest_min,
+            rest_sec=original.rest_sec,
+            warmup_series=original.warmup_series,
+            main_series=original.main_series,
+            main_series_reps=original.main_series_reps,
+            warmup=original.warmup,
+            main=original.main,
+            comment=original.comment,
+            alter_exercise=original.alter_exercise
+        )
+
+    if original_workout.image and original_workout.image.name != Config.objects.get(key="default_workout_image").value:
+        original_path = original_workout.image.path
+        file_name = os.path.basename(original_path)
+
+        new_folder = os.path.join(settings.MEDIA_ROOT, 'workout', str(duplicated_workout.id))
+        os.makedirs(new_folder, exist_ok=True)
+
+        new_file_path = os.path.join(new_folder, file_name)
+        shutil.copyfile(original_path, new_file_path)
+
+        relative_path = os.path.join('workout', str(duplicated_workout.id), file_name)
+        duplicated_workout.image = relative_path
+        duplicated_workout.save()
+    elif not original_workout.image:
+        duplicated_workout.image = Config.objects.get(key="default_workout_image").value
+        duplicated_workout.save()
+
+    messages.success(request, "Trening został zduplikowany")
+    return redirect('edit_training', id=duplicated_workout.id)
 
 
-def show_training(request):
-    pass
+def show_trainings(request):
+    workouts = Workout.objects.filter(created_by=request.user)
+
+    return render(request, 'show_trainings.html', {'workouts': workouts})
 
 
-def show_general_training(request, id):
-    pass
+def show_training(request, id):
+    workout = Workout.objects.get(id=id)
+    workout_exercises = WorkoutExercise.objects.filter(workout=workout)
+
+    return render(request, 'show_training.html', {'training': workout, 'workout_exercises': workout_exercises})
 
 
-def show_personal_training(request, id):
-    pass
+def edit_training(request, id):
+    workout = Workout.objects.get(id=id)
+    exercises = Exercise.objects.filter(created_by=request.user)
+    clients = User.objects.filter(profile__trainer=request.user)
+    workout_exercises = WorkoutExercise.objects.filter(workout=workout)
+
+    if request.method == 'POST':
+        post = request.POST
+        workout.title = post.get('title', '')
+        workout.is_personal = post.get('training-type') == 'personal'
+        workout.visibility = post.get('visible-radio') == 'yes'
+        workout.workout_date = parse_date(post.get('workout_date')) if workout.is_personal else None
+
+        client_id = post.get('workout-person', None)
+        workout.client = User.objects.get(id=client_id) if client_id else None
+
+        # Obsługa obrazu
+        if request.FILES:
+            image = request.FILES['image']
+            if image:
+                md5 = hashlib.md5()
+                for chunk in image.chunks():
+                    md5.update(chunk)
+                file_hash = md5.hexdigest()
+                extension = os.path.splitext(image.name)[1]
+                new_name = f"{file_hash}{extension}"
+                image.name = new_name
+
+                if workout.image.path != Config.objects.get("default_workout_image").value:
+                    workout.image.delete()
+                workout.image = image
+
+        workout.save()
+
+        # Usuń stare ćwiczenia
+        WorkoutExercise.objects.filter(workout=workout).delete()
+
+        try:
+            row_count = int(post.get('rowCount', '0'))
+        except ValueError:
+            row_count = 0
+
+        for i in range(1, row_count + 1):
+            exercise_id = post.get(f'exercise-id-{i}')
+            if not exercise_id:
+                continue
+
+            try:
+                exercise = Exercise.objects.get(pk=exercise_id)
+            except Exercise.DoesNotExist:
+                continue
+
+            tempo = post.get(f'tempo-{i}')
+            rest_min = post.get(f'rest-min-{i}')
+            rest_sec = post.get(f'rest-sec-{i}')
+            warmup_series = post.get(f'warmup-series-{i}')
+            main_series = post.get(f'main-series-{i}')
+            main_series_reps = post.get(f'main-series-reps-{i}')
+            comment = post.get(f'comment-{i}')
+            alter_exercise_id = post.get(f'alter-exercise-id-{i}')
+
+            warmup_json = _parse_json_reps(request, i, 'warmup')
+            main_json = _parse_json_reps(request, i, 'main')
+
+            alter_exercise = None
+            if alter_exercise_id:
+                try:
+                    alter_exercise = Exercise.objects.get(pk=alter_exercise_id)
+                except Exercise.DoesNotExist:
+                    pass
+
+            WorkoutExercise.objects.create(
+                workout=workout,
+                exercise=exercise,
+                tempo=tempo,
+                rest_min=int(rest_min) if rest_min else None,
+                rest_sec=int(rest_sec) if rest_sec else None,
+                warmup_series=int(warmup_series) if warmup_series else None,
+                main_series=int(main_series) if main_series else None,
+                main_series_reps=main_series_reps,
+                warmup=warmup_json,
+                main=main_json,
+                comment=comment,
+                alter_exercise=alter_exercise
+            )
+
+        messages.success(request, "Trening został zaktualizowany")
+        return redirect('show_trainings')
+
+    return render(request, 'edit_training.html', {
+        "training": workout,
+        "workout_exercises": workout_exercises,
+        "exercises": exercises,
+        "clients": clients
+    })
 
 
-def edit_general_training(request, id):
-    pass
+@login_required
+@csrf_protect
+def delete_training(request, id):
+    workout = Workout.objects.get(id=id)
+    workout_exercises = WorkoutExercise.objects.filter(workout=workout)
 
+    if workout.image:
+        if workout.image.path != Config.objects.get("default_workout_image").value:
+            if os.path.exists(os.path.dirname(os.path.join(settings.MEDIA_ROOT, workout.image.path))):
+                shutil.rmtree(os.path.dirname(os.path.join(settings.MEDIA_ROOT, workout.image.path)))
 
-def edit_personal_training(request, id):
-    pass
+    for workout_exercise in workout_exercises:
+        workout_exercise.delete()
 
+    workout.delete()
+    messages.success(request, "Trening został pomyślnie usunięty")
 
-def delete_general_training(request, id):
-    pass
-
-
-def delete_personal_training(request, id):
-    pass
+    return redirect('show_trainings')
 
 
 @login_required
@@ -411,12 +671,13 @@ def login_page(request):
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
 
-        if not user.is_staff and not user.is_superuser:
-            messages.error(request, "Nie masz uprawnień")
-            return render(request, 'login.html')
         if user:
-            login(request, user)
-            return redirect('home')
+            if not user.is_staff and not user.is_superuser:
+                messages.error(request, "Nie masz uprawnień")
+                return render(request, 'login.html')
+            else:
+                login(request, user)
+                return redirect('home')
         else:
             messages.error(request, "Niepoprawne dane logowania")
             return render(request, 'login.html')
