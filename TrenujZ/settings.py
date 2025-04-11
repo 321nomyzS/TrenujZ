@@ -51,7 +51,12 @@ INSTALLED_APPS = [
     # Tailwind
     'tailwind',
     'theme',
-    'django_browser_reload'
+    'django_browser_reload',
+    
+    # API
+    'rest_framework',
+    'rest_framework.authtoken',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -162,3 +167,13 @@ INTERNAL_IPS = [
 # Login configuration
 LOGIN_REDIRECT_URL = "/login"
 LOGIN_URL = "/login"
+
+# REST API
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
