@@ -127,3 +127,14 @@ class Config(models.Model):
 
     def __str__(self):
         return f"{self.key} = {self.value}"
+
+
+class Feedback(models.Model):
+    workout_exercise = models.ForeignKey(WorkoutExercise, on_delete=models.CASCADE, related_name='feedbacks')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    comment = models.TextField()
+    rating = models.IntegerField()
+
+    def __str__(self):
+        return f"Feedback by {self.created_by.username} on {self.workout_exercise}"

@@ -152,10 +152,7 @@ def _parse_json_reps(request, row_index, rep_type, max_series=4):
         key = f"{rep_type}-series-{i}-rep-{row_index}"
         val = request.POST.get(key)
         if val:
-            try:
-                reps.append(int(val))
-            except ValueError:
-                continue
+            reps.append(val)
     return reps
 
 
@@ -198,7 +195,7 @@ def add_training(request):
 
                 workout.image = image
         else:
-            workout.image = Config.objects.get("default_workout_image").value
+            workout.image = Config.objects.get(key="default_workout_image").value
         workout.save()
 
         try:
@@ -330,9 +327,10 @@ def edit_training(request, id):
     if request.method == 'POST':
         post = request.POST
         workout.title = post.get('title', '')
-        workout.is_personal = post.get('training-type') == 'personal'
         workout.visibility = post.get('visible-radio') == 'yes'
-        workout.workout_date = parse_date(post.get('workout_date')) if workout.is_personal else None
+
+        if workout.is_personal:
+            workout.workout_date = parse_date(post.get('workout_date')) if workout.is_personal else None
 
         client_id = post.get('workout-person', None)
         workout.client = User.objects.get(id=client_id) if client_id else None
@@ -349,7 +347,7 @@ def edit_training(request, id):
                 new_name = f"{file_hash}{extension}"
                 image.name = new_name
 
-                if workout.image.path != Config.objects.get("default_workout_image").value:
+                if workout.image.path != Config.objects.get(key="default_workout_image").value:
                     workout.image.delete()
                 workout.image = image
 
@@ -425,7 +423,7 @@ def delete_training(request, id):
     workout_exercises = WorkoutExercise.objects.filter(workout=workout)
 
     if workout.image:
-        if workout.image.path != Config.objects.get("default_workout_image").value:
+        if workout.image.path != Config.objects.get(key="default_workout_image").value:
             if os.path.exists(os.path.dirname(os.path.join(settings.MEDIA_ROOT, workout.image.path))):
                 shutil.rmtree(os.path.dirname(os.path.join(settings.MEDIA_ROOT, workout.image.path)))
 
