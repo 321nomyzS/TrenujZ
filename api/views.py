@@ -62,6 +62,16 @@ class CurrentUserImageView(APIView):
         return Response({"image": image_url})
 
 
+class CurrentUserImageTrainerView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        trainer = request.user.profile.trainer
+
+        image_url = trainer.profile.image.url if request.user.profile.image else None
+        return Response({"image": image_url})
+
+
 class GeneralWorkoutListView(APIView):
     permission_classes = [IsAuthenticated]
 

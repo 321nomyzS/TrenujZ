@@ -40,6 +40,7 @@ class ExerciseDetailsSerializer(serializers.ModelSerializer):
             'video_link',
             'language',
             'tags',
+            'image'
         ]
 
     def get_language(self, obj):
