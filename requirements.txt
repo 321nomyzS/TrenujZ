@@ -1,0 +1,5 @@
+djangorestframework
+django-environ
+django-tailwind
+django-tailwind[reload]
+pillow
