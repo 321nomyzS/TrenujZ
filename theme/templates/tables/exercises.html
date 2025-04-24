@@ -1,0 +1,118 @@
+<div class="rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+  <div class="max-w-full overflow-x-auto">
+    <table class="min-w-full">
+      <!-- table header start -->
+      <thead>
+        <tr class="border-b border-gray-100 dark:border-gray-800">
+          <th class="px-5 py-3 sm:px-6">
+            <div class="flex items-center">
+              <p
+                class="font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+              >
+                Nazwa ćwiczenia
+              </p>
+            </div>
+          </th>
+          <th class="px-5 py-3 sm:px-6">
+            <div class="flex items-center">
+              <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">
+                Tagi
+              </p>
+            </div>
+          </th>
+          <th class="px-5 py-3 sm:px-6">
+            <div class="flex items-center">
+              <p
+                class="font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+              >
+                Język
+              </p>
+            </div>
+          </th>
+          <th class="px-5 py-3 sm:px-6">
+            <div class="flex items-center">
+              <p
+                class="font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+              >
+                Akcje
+              </p>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <!-- table header end -->
+      <!-- table body start -->
+      <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+      {% for exercise in exercises %}
+        <tr>
+          <td class="px-5 py-4 sm:px-6">
+            <div class="flex items-center">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 overflow-hidden rounded-full">
+                  <img src="{{ exercise.image.url }}" alt="brand" />
+                </div>
+
+                <div>
+                  <span
+                    class="block font-medium text-gray-800 text-theme-sm dark:text-white/90"
+                  >
+                    {{ exercise.title }}
+                  </span>
+                  <span
+                    class="block text-gray-500 text-theme-xs dark:text-gray-400"
+                  >
+                    {{ exercise.created_at | date:'Y-m-d H:m' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="px-5 py-4 sm:px-6">
+            <div class="flex items-center">
+              <p class="text-gray-500 text-theme-sm dark:text-gray-400 text-sm">
+                  {% for tag in exercise.tags.all %}
+                      {{ tag.name }}
+                      <br>
+                  {% endfor %}
+              </p>
+            </div>
+          </td>
+          <td class="px-5 py-4 sm:px-6">
+            <div class="flex items-center">
+              <p
+                class="rounded-full bg-success-50 px-2 py-0.5 text-theme-xs text-success-700 dark:bg-success-500/15 dark:text-success-500"
+              >
+                {{ exercise.language.name }}
+              </p>
+            </div>
+          </td>
+        <td class="px-5 py-4 sm:px-6 flex flex-col lg:flex-row justify-around h-full">
+            <a href="{% url 'show_exercise' id=exercise.id %}" class="bg-green-600 flex flex-row w-20 justify-around rounded-md text-sm hover:bg-green-800 lg:mb-0 mb-2">
+                <p class="text-white my-auto">
+                    Pokaż
+                </p>
+                <svg  class="my-auto" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </a>
+            <a href="{% url 'edit_exercise' id=exercise.id %}" class="bg-blue-500 flex flex-row w-20 h-6 justify-around rounded-md text-sm hover:bg-blue-700 lg:mb-0 mb-2">
+                <p class="text-white my-auto">
+                    Edytuj
+                </p>
+                <svg class="my-auto" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon>
+            </svg>
+            </a>
+            <a href="{% url 'delete_exercise' id=exercise.id %}" class="bg-red-700 flex flex-row w-20 justify-around rounded-md text-sm hover:bg-red-900 lg:mb-0 mb-2">
+                <p class="text-white my-auto">
+                    Usuń
+                </p>
+                <svg class="my-auto" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+            </a>
+        </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
