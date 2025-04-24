@@ -1,0 +1,93 @@
+{% load static %}
+<aside
+  :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full'"
+  class="fixed left-0 top-0 z-9999 flex min-h-screen w-[270px] flex-col border-r border-gray-200 bg-gray-800 lg:static lg:translate-x-0 lg:h-auto"
+>
+  <!-- SIDEBAR HEADER -->
+  <div
+    :class="sidebarToggle ? 'justify-center' : 'justify-between'"
+    class="flex items-center gap-2 py-3 lg:py-4 sidebar-header bg-gray-900 px-5"
+  >
+    <a href="/" class="h-10 lg:h-11 flex justify-center items-center w-full">
+      <span class="logo" :class="sidebarToggle ? 'hidden' : ''">
+        <img class="" src="{% static 'images/logo/logo-dark.svg' %}" alt="Logo" />
+      </span>
+
+      <img
+        class="logo-icon"
+        :class="sidebarToggle ? 'lg:block' : 'hidden'"
+        src="{% static 'images/logo/logo-icon.svg' %}"
+        alt="Logo"
+      />
+    </a>
+  </div>
+  <!-- SIDEBAR HEADER -->
+
+  <div
+    class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar"
+  >
+    <!-- Sidebar Menu -->
+    <nav
+        :class="sidebarOpen ? 'w-64' : 'w-20'"
+        class="flex flex-col bg-gray-800 h-screen px-2 py-4 transition-all duration-300 overflow-hidden"
+    >
+        <!-- Ćwiczenia -->
+        <div class="flex py-2 mb-2 bg-gray-900 text-white rounded-lg justify-center text-lg">
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Ćwiczenia</span>
+            <span class="text-white" :class="sidebarToggle ? '' : 'lg:hidden'">️</span>
+        </div>
+        <a href="{% url 'add_exercise' %}" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700" :class="sidebarToggle ? 'lg:justify-center' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.08V8l-6-6H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h6"/><path d="M14 3v5h5M18 21v-6M15 18h6"/></svg>
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Dodaj nowe ćwiczenie</span>
+        </a>
+        <a href="{% url 'show_exercises' %}" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700" :class="sidebarToggle ? 'lg:justify-center' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg>
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Pokaż ćwiczenia</span>
+        </a>
+
+        <!-- Treningi -->
+        <div class="flex px-4 py-2 mb-2 bg-gray-900 text-white rounded-lg justify-center text-lg mt-4">
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Treningi</span>
+            <span class="text-white" :class="sidebarToggle ? '' : 'lg:hidden'">️</span>
+        </div>
+        <a href="{% url 'add_training' %}" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700" :class="sidebarToggle ? 'lg:justify-center' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h5l2 3h9a2 2 0 0 1 2 2v2M19 15v6M16 18h6"/></svg></svg>
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Dodaj nowy trening</span>
+        </a>
+        <a href="{% url 'show_trainings' %}" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700" :class="sidebarToggle ? 'lg:justify-center' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Pokaż treningi</span>
+        </a>
+
+        <!-- Użytkownicy -->
+        <div class="flex px-4 py-2 mb-2 bg-gray-900 text-white rounded-lg justify-center text-lg mt-4">
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Użytkownicy</span>
+            <span class="text-white" :class="sidebarToggle ? '' : 'lg:hidden'">️</span>
+        </div>
+        <a href="{% url 'add_user' %}" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700" :class="sidebarToggle ? 'lg:justify-center' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Dodaj użytkownika</span>
+        </a>
+        <a href="{% url 'show_users' %}" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700" :class="sidebarToggle ? 'lg:justify-center' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Pokaż użytkowników</span>
+        </a>
+
+        <!-- Tagi -->
+        <div class="flex px-4 py-2 mb-2 bg-gray-900 text-white rounded-lg justify-center text-lg mt-4">
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Tagi</span>
+            <span class="text-white" :class="sidebarToggle ? '' : 'lg:hidden'">️</span>
+        </div>
+        <a href="{% url 'add_tag' %}" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700" :class="sidebarToggle ? 'lg:justify-center' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Dodaj tag</span>
+        </a>
+        <a href="{% url 'show_tags' %}" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700" :class="sidebarToggle ? 'lg:justify-center' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
+            <span class="text-white" :class="sidebarToggle ? 'lg:hidden' : ''">Pokaż tagi</span>
+        </a>
+
+    </nav>
+    <!-- Sidebar Menu -->
+  </div>
+</aside>
