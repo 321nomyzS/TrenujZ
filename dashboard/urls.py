@@ -25,5 +25,6 @@ urlpatterns = [
     path('tag/edit/<id>', views.edit_tag, name='edit_tag'),
     path('tag/delete/<id>', views.delete_tag, name='delete_tag'),
     path('login', views.login_page, name='login'),
-    path('logout', views.logout_tunnel, name='logout_tunnel')
+    path('logout', views.logout_tunnel, name='logout_tunnel'),
+    path('tmp', views.tmp, name='tmp'),
 ]

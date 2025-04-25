@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.utils.dateparse import parse_date
 from dashboard.models import *
+import dashboard.validation as validation
 from datetime import datetime
 
 import shutil
@@ -24,6 +25,15 @@ def add_exercise(request):
     languages = ExerciseLanguage.objects.all()
 
     if request.method == 'POST':
+        errors = validation.validate_exercise_data(request)
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return render(request, 'add_exercise.html', {
+                'languages': ExerciseLanguage.objects.all(),
+                'tags': Tag.objects.all()
+            })
+
         title = request.POST.get('title')
         language_name = request.POST.get('language')
         video_link = request.POST.get('video_link')
@@ -314,8 +324,9 @@ def show_trainings(request):
 def show_training(request, id):
     workout = Workout.objects.get(id=id)
     workout_exercises = WorkoutExercise.objects.filter(workout=workout)
+    feedback = Feedback.objects.filter(workout_exercise__workout=workout)
 
-    return render(request, 'show_training.html', {'training': workout, 'workout_exercises': workout_exercises})
+    return render(request, 'show_training.html', {'feedback': feedback,'training': workout, 'workout_exercises': workout_exercises})
 
 
 def edit_training(request, id):
@@ -439,7 +450,7 @@ def delete_training(request, id):
 @login_required
 def show_tags(request):
     tag_category = TagCategory.objects.all()
-    tags = Tag.objects.all()
+    tags = Tag.objects.all().order_by('category')
 
     return render(request, 'show_tags.html', {"tag_category": tag_category, "tags": tags})
 
@@ -531,6 +542,12 @@ def delete_tag(request, id):
 @login_required
 def add_user(request):
     if request.method == 'POST':
+        errors = validation.validate_user_data(request)
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return render(request, 'add_user.html')
+
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
@@ -558,11 +575,13 @@ def add_user(request):
         else:
             profile.is_active = True
 
-        if active_until_raw != "":
+        if active_until_raw:
             profile.active_until = datetime.strptime(active_until_raw, "%Y-%m-%d").date()
+        else:
+            profile.active_until = None
 
         if request.FILES:
-            image = request.FILES['photo']
+            image = request.FILES['image']
 
             if image:
                 md5 = hashlib.md5()
@@ -588,6 +607,12 @@ def edit_user(request, id):
     user = User.objects.get(id=id)
 
     if request.method == 'POST':
+        errors = validation.validate_user_data(request, editing_user_id=id)
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return render(request, 'edit_user.html', {"client": user})
+
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
@@ -598,6 +623,8 @@ def edit_user(request, id):
         user.first_name = first_name
         user.last_name = last_name
         user.email = email
+        user.username = email
+
         if password:
             user.set_password(password)
 
@@ -612,11 +639,13 @@ def edit_user(request, id):
         else:
             profile.is_active = True
 
-        if active_until_raw != "":
+        if active_until_raw:
             profile.active_until = datetime.strptime(active_until_raw, "%Y-%m-%d").date()
+        else:
+            profile.active_until = None
 
         if request.FILES:
-            image = request.FILES['photo']
+            image = request.FILES['image']
 
             if image:
                 md5 = hashlib.md5()
@@ -627,8 +656,9 @@ def edit_user(request, id):
                 extension = os.path.splitext(image.name)[1]
                 new_name = f"{file_hash}{extension}"
                 image.name = new_name
-                profile.image.delete()
 
+                if profile.image.url != "/media" + Config.objects.get(key="default_user_image").value:
+                    profile.image.delete()
                 profile.image = image
         profile.save()
 
@@ -656,8 +686,22 @@ def delete_user(request, id):
     user = User.objects.get(id=id)
     profile = user.profile
 
-    profile.is_hidden = True
-    profile.save()
+    is_related = (
+        user.created_workouts.exists() or
+        user.workouts.exists() or
+        user.trainees.exists() or
+        user.tag_set.exists() or
+        user.exercise_set.exists() or
+        user.feedback_set.exists()
+    )
+
+    if is_related:
+        profile.is_hidden = True
+        profile.save()
+        messages.success(request, "Użytkownik został ukryty pomyślnie")
+    else:
+        user.delete()
+        messages.success(request, "Użytkownik został usunięty pomyślnie")
 
     return redirect('show_users')
 
@@ -686,3 +730,7 @@ def logout_tunnel(request):
     logout(request)
     messages.info(request, "Zostałeś wylogowany")
     return redirect('login')
+
+
+def tmp(requset):
+    return render(requset, 'tmp.html')
