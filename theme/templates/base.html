@@ -8,13 +8,12 @@
   {% load tailwind_tags %}
   {% tailwind_css %}
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  {% block extra_head %}{% endblock %}
 </head>
 <body
   x-data="{'loaded': true, 'stickyMenu': false, 'sidebarToggle': false, }"
   class="bg-gray-100 h-full overflow-hidden"
 >
-  <!-- Preloader -->
-  {% include 'partials/preloader.html' %}
 
   <div class="flex min-h-screen">
       <div class="relative flex flex-row flex-1 overflow-y-auto">
@@ -27,7 +26,7 @@
         {% include 'partials/header.html' %}
 
         <main class="flex-1 overflow-y-auto px-5">
-            <div class="w-full flex flex-col">
+            <div class="w-full flex flex-col mt-2">
             {% for message in messages %}
                 <div class="flex items-center p-4 mb-4 text-sm
                     {% if message.level == 40 %} text-red-800 border-red-300 bg-red-50 {% endif %}
