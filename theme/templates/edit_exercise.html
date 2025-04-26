@@ -180,7 +180,7 @@
                           id="tag-{{ tag.id }}"
                           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                           type="checkbox"
-                          name="tags[]"
+                          name="tags"
                           value="{{ tag.id }}"
                           {% if tag in exercise.tags.all %}checked{% endif %}
                         >

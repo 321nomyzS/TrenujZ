@@ -1,11 +1,55 @@
 import re
 from urllib.parse import urlparse
-from django.contrib.auth import get_user_model
+from dashboard.models import *
+
+
+def validate_tag_data(request, editing_tag_id=None):
+    errors = []
+
+    name = request.POST.get('name', '').strip()
+    category_id = request.POST.get('tag-category', '').strip()
+    image = request.FILES.get('image')
+
+    # NAME
+    if not name:
+        errors.append("Pole nazwy tagu nie może być puste.")
+    elif len(name) > 50:
+        errors.append("Nazwa tagu może mieć maksymalnie 50 znaków.")
+
+    # CATEGORY
+    category_instance = None
+
+    # CATEGORY
+    if not category_id:
+        errors.append("Musisz wybrać kategorię tagu.")
+    else:
+        try:
+            category_id_int = int(category_id)
+            category_instance = TagCategory.objects.get(id=category_id_int)
+            if not category_instance:
+                errors.append("Wybrana kategoria nie istnieje.")
+        except ValueError:
+            errors.append("Nieprawidłowa wartość kategorii.")
+
+    # SPRAWDZANIE DUPLIKATU TAGU
+    if name and category_instance:
+        tag_qs = Tag.objects.filter(name=name, category=category_instance)
+        if editing_tag_id:
+            tag_qs = tag_qs.exclude(id=editing_tag_id)
+        if tag_qs.exists():
+            errors.append("Tag o takiej nazwie w tej kategorii już istnieje.")
+
+    # IMAGE
+    if image:
+        valid_mime_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+        if image.content_type not in valid_mime_types:
+            errors.append("Plik obrazka musi być typu JPG, PNG, GIF lub WEBP.")
+
+    return errors
 
 
 def validate_user_data(request, editing_user_id=None):
     errors = []
-    User = get_user_model()
 
     first_name = request.POST.get('first_name', '').strip()
     last_name = request.POST.get('last_name', '').strip()
@@ -81,7 +125,7 @@ def validate_exercise_data(request):
         except Exception:
             errors.append("Link do wideo musi być poprawnym adresem URL.")
 
-    # HTML_CONTENT (sprawdzamy czysty tekst bez HTML)
+    # HTML_CONTENT
     plain_text = re.sub(r'<[^>]+>', '', html_content).strip()
     if not plain_text:
         errors.append("Treść ćwiczenia nie może być pusta.")

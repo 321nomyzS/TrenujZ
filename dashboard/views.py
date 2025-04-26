@@ -101,6 +101,7 @@ def edit_exercise(request, id):
     languages = ExerciseLanguage.objects.all()
 
     if request.method == 'POST':
+        print(request.POST)
         title = request.POST.get('title')
         language_name = request.POST.get('language')
         video_link = request.POST.get('video_link')
@@ -466,6 +467,12 @@ def add_tag(request):
     tag_category = TagCategory.objects.all()
 
     if request.method == 'POST':
+        errors = validation.validate_tag_data(request)
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return render(request, 'add_tag.html', {"tag_category": tag_category})
+
         new_tag_category = request.POST['tag-category']
         tag_name = request.POST['name']
         new_tag = Tag(name=tag_name, category_id=new_tag_category, created_by=request.user)
@@ -499,6 +506,12 @@ def edit_tag(request, id):
     tag_category = TagCategory.objects.all()
 
     if request.method == 'POST':
+        errors = validation.validate_tag_data(request, editing_tag_id=id)
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return render(request, 'add_tag.html', {"tag_category": tag_category})
+
         new_tag_category = request.POST['tag-category']
         tag_name = request.POST['name']
         tag.name = tag_name

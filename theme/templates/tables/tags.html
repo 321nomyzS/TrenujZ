@@ -32,8 +32,10 @@
           <td class="px-5 py-4 sm:px-6">
             <div class="flex items-center">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 overflow-hidden rounded-full">
-                  <img src="{{ tag.image.url }}" alt="brand" class="w-full h-full object-cover"/>
+                <div class="w-10 h-10 overflow-hidden rounded-full bg-gray-300">
+                    {% if tag.image %}
+                        <img src="{{ tag.image.url }}" alt="brand" class="w-full h-full object-cover"/>
+                    {% endif %}
                 </div>
 
                 <div>

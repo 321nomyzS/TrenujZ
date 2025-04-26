@@ -1,50 +1,105 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_head %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'js/tag.js' %}"></script>
+{% endblock %}
+
 {% block content %}
-
-    <form class="mx-auto mb-2 w-4/5 items-center" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+<form class="grid grid-cols-1 gap-6 sm:grid-cols-2" method="post" enctype="multipart/form-data">
+{% csrf_token %}
+    <div class="space-y-6">
+        <div
+      class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+    >
+      <div class="px-5 py-4 sm:px-6 sm:py-5">
+        <h3
+          class="text-base font-medium text-gray-800 dark:text-white/90"
+        >
+          Tag #{{ tag.id }}
+        </h3>
+      </div>
+      <div
+        class="space-y-6 border-t border-gray-100 p-5 sm:p-6 dark:border-gray-800"
+      >
+        <!-- Elements -->
         <div>
-            <p class="font-medium text-gray-900 text-2xl mb-7">
-
-            </p>
+          <label
+            class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+          >
+            Nazwa tagu
+          </label>
+          <input name="name" id="name" disabled value="{{ tag.name }}"
+            type="text"
+            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+          />
         </div>
-        <div class="flex flex-row mb-2 w-4/5">
-            <div class="flex-1 w-2/3">
-                <div class="mb-5 w-4/5">
-                    <label for="name" class="block mb-2 text-sm font-medium text-gray-900">Nazwa</label>
-                    <input disabled value="{{ tag.name }}" name="name" type="text" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                </div>
-
-                <div class="w-1/2 mr-3">
-                    <label for="tag-type" class="block mb-2 text-sm font-medium text-gray-900">Rodzaj tagu</label>
-                    <select disabled name="tag-type" id="tag-type" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                        <option value="muscle-tag" {% if tag_type == 'muscle' %} selected {% endif %}>Mięsień</option>
-                        <option value="exercise-type-tag" {% if tag_type == 'exercise-type' %} selected {% endif %}>Rodzaj ćwiczenia</option>
-                    </select>
-                </div>
-
-            </div>
-            <div class="flex-2 w-1/3">
-                <div class="mb-5">
-                    <label for="id_image" class="block mb-2 text-sm font-medium text-gray-900">Zdjęcie lub GIF</label>
-
-                    {% if tag.image %}
-                        <img class="rounded-md aspect-w-1 aspect-h-1 pb-0" src="{{ tag.image.url }}" alt="Zdjęcie ćwiczenia">
-                    {% endif %}
-                </div>
-                <div class="flex justify-center justify-around">
-                    <a href="{% url 'edit_tag' id=tag.id %}" class="bg-blue-500 hover:bg-blue-700 inline-flex items-center px-10 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white rounded-lg focus:ring-4 focus:ring-primary-200 hover:bg-primary-800">
-                        Edytuj
-                    </a>
-
-                    <a href="{% url 'delete_tag' id=tag.id %}" class="bg-red-700 hover:bg-red-900 inline-flex items-center px-10 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white rounded-lg focus:ring-4 focus:ring-primary-200 hover:bg-primary-800">
-                        Usuń
-                    </a>
-                </div>
+        <!-- Elements -->
+        <div>
+          <label
+            class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+          >
+            Typ tagu
+          </label>
+          <div
+            x-data="{ isOptionSelected: false }"
+            class="relative z-20 bg-transparent"
+          >
+            <input name="tag-category" id="tag-category" disabled value="{{ tag.category.name }}"
+              class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+              :class="isOptionSelected && 'text-gray-800 dark:text-white/90'"
+              @change="isOptionSelected = true"
+            >
+            <span
+              class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+            >
+              <svg
+                class="stroke-current"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396"
+                  stroke=""
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="space-y-6">
+        <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="px-5 py-4 sm:px-6 sm:py-5">
+            <h3
+              class="text-base font-medium text-gray-800 dark:text-white/90"
+            >
+              Zdjęcie tagu
+            </h3>
+          </div>
+          <div
+            class="space-y-6 border-t border-gray-100 p-5 sm:p-6 dark:border-gray-800"
+          >
+            <!-- Elements -->
+            <div class="mb-5">
+                {% if tag.image %}
+                    <img class="rounded-md aspect-w-1 aspect-h-1 pb-0" src="{{ tag.image.url }}" alt="Zdjęcie ćwiczenia">
+                {% endif %}
             </div>
         </div>
+    </div>
+</form>
+{% endblock %}
 
-    </form>
+
+{% block end_file %}
+
 {% endblock %}

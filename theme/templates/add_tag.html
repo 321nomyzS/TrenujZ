@@ -1,59 +1,122 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_head %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'js/tag.js' %}"></script>
+{% endblock %}
+
 {% block content %}
-
-    <form class="mx-auto mb-2 w-4/5 items-center" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+<form class="grid grid-cols-1 gap-6 sm:grid-cols-2" method="post" enctype="multipart/form-data" id="tag-form">
+{% csrf_token %}
+    <div class="space-y-6">
+        <div
+      class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+    >
+      <div class="px-5 py-4 sm:px-6 sm:py-5">
+        <h3
+          class="text-base font-medium text-gray-800 dark:text-white/90"
+        >
+          Dodaj nowy tag
+        </h3>
+      </div>
+      <div
+        class="space-y-6 border-t border-gray-100 p-5 sm:p-6 dark:border-gray-800"
+      >
+        <!-- Elements -->
         <div>
-            <p class="font-medium text-gray-900 text-2xl mb-7">
-                Dodaj nowy tag
-            </p>
+          <label
+            class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+          >
+            Nazwa tagu
+          </label>
+          <input name="name" id="name"
+            type="text"
+            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+          />
         </div>
-        <div class="flex flex-row mb-2 w-4/5">
-            <div class="flex-1 w-2/3">
-                <div class="mb-5 w-4/5">
-                    <label for="name" class="block mb-2 text-sm font-medium text-gray-900">Nazwa</label>
-                    <input name="name" type="text" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                </div>
-
-                <div class="w-1/2 mr-3">
-                    <label for="tag-type" class="block mb-2 text-sm font-medium text-gray-900">Rodzaj tagu</label>
-                    <select name="tag-category" id="tag-type" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                        {% for category in tag_category %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-            </div>
-            <div class="flex-2 w-1/3">
-                <div class="mb-5">
-                    <label for="id_image" class="block mb-2 text-sm font-medium text-gray-900">Zdjęcie</label>
-
-                        <div class="font-[sans-serif] max-w-md mx-auto">
-                              <input name="image" type="file" class="w-full text-gray-400 font-semibold text-sm bg-white border file:cursor-pointer cursor-pointer file:border-0 file:py-2.5 file:px-4 file:mr-4 file:bg-gray-100 file:hover:bg-gray-200 file:text-gray-600 rounded" />
-                          <div
-                            class="mt-5 bg-gray-50 text-gray-600 text-base rounded w-full h-48 flex flex-col items-center justify-center border-2 border-gray-300 border-dashed">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-12 mb-2 fill-gray-400" viewBox="0 0 32 32">
-                              <path
-                                d="M23.75 11.044a7.99 7.99 0 0 0-15.5-.009A8 8 0 0 0 9 27h3a1 1 0 0 0 0-2H9a6 6 0 0 1-.035-12 1.038 1.038 0 0 0 1.1-.854 5.991 5.991 0 0 1 11.862 0A1.08 1.08 0 0 0 23 13a6 6 0 0 1 0 12h-3a1 1 0 0 0 0 2h3a8 8 0 0 0 .75-15.956z"
-                                data-original="#000000" />
-                              <path
-                                d="M20.293 19.707a1 1 0 0 0 1.414-1.414l-5-5a1 1 0 0 0-1.414 0l-5 5a1 1 0 0 0 1.414 1.414L15 16.414V29a1 1 0 0 0 2 0V16.414z"
-                                data-original="#000000" />
-                            </svg>
-                            <p class="text-sm font-semibold text-gray-600">Drag & Drop files here</p>
-                          </div>
-                        </div>
-                </div>
-                <div class="flex justify-center">
-                    <button type="submit" class="bg-blue-700 hover:bg-blue-900 inline-flex items-center px-10 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white rounded-lg focus:ring-4 focus:ring-primary-200 hover:bg-primary-800">
-                        Zatwierdź
-                    </button>
-                </div>
-            </div>
+        <!-- Elements -->
+        <div>
+          <label
+            class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+          >
+            Typ tagu
+          </label>
+          <div
+            x-data="{ isOptionSelected: false }"
+            class="relative z-20 bg-transparent"
+          >
+            <select name="tag-category" id="tag-category"
+              class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+              :class="isOptionSelected && 'text-gray-800 dark:text-white/90'"
+              @change="isOptionSelected = true"
+            >
+                {% for category in tag_category %}
+                    <option class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <span
+              class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+            >
+              <svg
+                class="stroke-current"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396"
+                  stroke=""
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+          </div>
         </div>
+        <!-- Elements -->
+        <div class="flex justify-end">
+            <button onclick="submitForm(event)" class="bg-blue-700 hover:bg-blue-900 inline-flex items-center px-10 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white rounded-lg focus:ring-4 focus:ring-primary-200 hover:bg-primary-800">
+                Zatwierdź
+            </button>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="space-y-6">
+        <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="px-5 py-4 sm:px-6 sm:py-5">
+            <h3
+              class="text-base font-medium text-gray-800 dark:text-white/90"
+            >
+              Zdjęcie tagu
+            </h3>
+          </div>
+          <div
+            class="space-y-6 border-t border-gray-100 p-5 sm:p-6 dark:border-gray-800"
+          >
+            <!-- Elements -->
+            <div>
+              <label
+                class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+              >
+                Prześlij plik
+              </label>
+              <input name="image" id="image"
+                type="file"
+                class="focus:border-ring-brand-300 shadow-theme-xs focus:file:ring-brand-300 h-11 w-full overflow-hidden rounded-lg border border-gray-300 bg-transparent text-sm text-gray-500 transition-colors file:mr-5 file:border-collapse file:cursor-pointer file:rounded-l-lg file:border-0 file:border-r file:border-solid file:border-gray-200 file:bg-gray-50 file:py-3 file:pr-3 file:pl-3.5 file:text-sm file:text-gray-700 placeholder:text-gray-400 hover:file:bg-gray-100 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:text-white/90 dark:file:border-gray-800 dark:file:bg-white/[0.03] dark:file:text-gray-400 dark:placeholder:text-gray-400"
+              />
+            </div>
+          </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
 
-    </form>
+
+{% block end_file %}
+
 {% endblock %}
