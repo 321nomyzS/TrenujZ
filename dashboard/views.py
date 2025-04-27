@@ -14,6 +14,7 @@ import hashlib
 import os
 
 
+@login_required
 def home(request):
     return render(request, 'base.html')
 
@@ -167,6 +168,7 @@ def _parse_json_reps(request, row_index, rep_type, max_series=4):
     return reps
 
 
+@login_required
 def add_training(request):
     exercises = Exercise.objects.filter(created_by=request.user)
     clients = User.objects.filter(profile__trainer=request.user)
@@ -316,12 +318,14 @@ def duplicate_training(request, id):
     return redirect('edit_training', id=duplicated_workout.id)
 
 
+@login_required
 def show_trainings(request):
     workouts = Workout.objects.filter(created_by=request.user)
 
     return render(request, 'show_trainings.html', {'workouts': workouts})
 
 
+@login_required
 def show_training(request, id):
     workout = Workout.objects.get(id=id)
     workout_exercises = WorkoutExercise.objects.filter(workout=workout)
@@ -330,6 +334,7 @@ def show_training(request, id):
     return render(request, 'show_training.html', {'feedback': feedback,'training': workout, 'workout_exercises': workout_exercises})
 
 
+@login_required
 def edit_training(request, id):
     workout = Workout.objects.get(id=id)
     exercises = Exercise.objects.filter(created_by=request.user)
