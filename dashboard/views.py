@@ -174,6 +174,7 @@ def add_training(request):
     clients = User.objects.filter(profile__trainer=request.user)
 
     if request.method == 'POST':
+        print(request.POST)
         post = request.POST
         title = post.get('title', '')
         is_personal = post.get('training-type') == 'personal'
@@ -440,7 +441,7 @@ def delete_training(request, id):
     workout_exercises = WorkoutExercise.objects.filter(workout=workout)
 
     if workout.image:
-        if workout.image.path != Config.objects.get(key="default_workout_image").value:
+        if workout.image.name != Config.objects.get(key="default_workout_image").value:
             if os.path.exists(os.path.dirname(os.path.join(settings.MEDIA_ROOT, workout.image.path))):
                 shutil.rmtree(os.path.dirname(os.path.join(settings.MEDIA_ROOT, workout.image.path)))
 
