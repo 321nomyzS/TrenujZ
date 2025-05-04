@@ -138,9 +138,10 @@
 {% endblock %}
 
 {% block content %}
-    <form class="grid grid-cols-1 gap-6 sm:grid-cols-2" method="post" enctype="multipart/form-data">
+    <form class="grid gap-6" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <div class="space-y-6 col-span-1">
+        <div class="flex flex-col md:flex-row w-full justify-between">
+            <div class="space-y-4 md:w-3/5 mr-0 md:mr-5">
             <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
                 <div class="px-5 py-4 sm:px-6 sm:py-5">
                     <h3 class="text-base font-medium text-gray-800 dark:text-white/90">Trening {% if training.is_personal %} Personalny {% endif %} {% if not training.is_personal %} Ogólny {% endif %}#{{ training.id }}</h3>
@@ -270,16 +271,20 @@
                         </div>
                         {% endif %}
                     </div>
-                    <div class="flex justify-end">
-                        <button onclick="submitForm(event)"
-                                class="bg-blue-700 hover:bg-blue-900 inline-flex items-center px-10 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white rounded-lg focus:ring-4 focus:ring-primary-200 hover:bg-primary-800">
-                            Zatwierdź
-                        </button>
-                    </div>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="px-5 py-4 sm:px-6 sm:py-5">
+                      <h3 class="text-base font-medium text-gray-800 dark:text-white/90">
+                        Feedback użytkowników
+                      </h3>
+                </div>
+                <div class="p-5 border-t border-gray-100 dark:border-gray-800 sm:p-6">
+                    {% include 'tables/feedback.html' %}
                 </div>
             </div>
         </div>
-        <div class="space-y-6 col-span-1">
+            <div class="space-y-4 md:w-2/5">
             <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
                 <div class="px-5 py-4 sm:px-6 sm:py-5">
                     <h3
@@ -300,7 +305,9 @@
                 </div>
             </div>
         </div>
-        <div class="space-y-6 col-span-3">
+        </div>
+
+        <div class="col-span-3">
             <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
                 <div class="px-5 py-4 sm:px-6 sm:py-5">
                     <h3 class="text-base font-medium text-gray-800 dark:text-white/90">Ćwiczenia w treningu</h3>

@@ -1,0 +1,96 @@
+<div class="rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+  <div class="max-w-full overflow-x-auto">
+    <!-- Kontener z pionowym scrollowaniem -->
+    <div class="max-h-[400px] overflow-y-auto">
+    <table class="min-w-full">
+      <!-- table header start -->
+      <thead>
+        <tr class="border-b border-gray-100 dark:border-gray-800">
+          <th class="px-5 py-3 sm:px-6 w-2/5">
+            <div class="flex items-center">
+              <p
+                class="font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+              >
+                Nazwa ćwiczenia
+              </p>
+            </div>
+          </th>
+          <th class="px-5 py-3 sm:px-6 w-1/5">
+            <div class="flex items-center">
+              <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">
+                Ocena
+              </p>
+            </div>
+          </th>
+          <th class="px-5 py-3 sm:px-6 w-2/5">
+            <div class="flex items-center">
+              <p
+                class="font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+              >
+                Użytkownik
+              </p>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <!-- table header end -->
+      <!-- table body start -->
+      <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+      {% for feed in feedback %}
+        <tr>
+          <td class="px-5 py-4 sm:px-6">
+            <div class="flex items-center">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 overflow-hidden rounded-full">
+                  <img src="{{ feed.workout_exercise.exercise.image.url }}" alt="brand" />
+                </div>
+
+                <div>
+                  <span
+                    class="block font-medium text-gray-800 text-theme-sm dark:text-white/90"
+                  >
+                    {{ feed.workout_exercise.exercise.title }}
+                  </span>
+                  <span
+                    class="block text-gray-500 text-theme-xs dark:text-gray-400"
+                  >
+                    {{ feed.created_at | date:'Y-m-d H:m' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="px-5 py-4 sm:px-6">
+            <div class="flex items-center">
+                {{ feed.rating }}
+            </div>
+          </td>
+          <td class="px-5 py-4 sm:px-6">
+            <div class="flex items-center">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 overflow-hidden rounded-full">
+                  <img src="{{ feed.created_by.profile.image.url }}" alt="brand" />
+                </div>
+
+                <div>
+                  <span
+                    class="block font-medium text-gray-800 text-theme-sm dark:text-white/90"
+                  >
+                    {{ feed.created_by.first_name }} {{ feed.created_by.last_name }}
+                  </span>
+                  <span
+                    class="block text-gray-500 text-theme-xs dark:text-gray-400"
+                  >
+                    {{ feed.comment }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
