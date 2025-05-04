@@ -102,7 +102,6 @@ def edit_exercise(request, id):
     languages = ExerciseLanguage.objects.all()
 
     if request.method == 'POST':
-        print(request.POST)
         title = request.POST.get('title')
         language_name = request.POST.get('language')
         video_link = request.POST.get('video_link')
@@ -174,7 +173,6 @@ def add_training(request):
     clients = User.objects.filter(profile__trainer=request.user)
 
     if request.method == 'POST':
-        print(request.POST)
         post = request.POST
         title = post.get('title', '')
         is_personal = post.get('training-type') == 'personal'
@@ -278,7 +276,8 @@ def duplicate_training(request, id):
         workout_date=original_workout.workout_date,
         client=original_workout.client,
         created_by=original_workout.created_by,
-        visibility=False
+        visibility=False,
+        image=Config.objects.get(key="default_workout_image").value
     )
 
     original_exercises = WorkoutExercise.objects.filter(workout=original_workout)
@@ -298,23 +297,6 @@ def duplicate_training(request, id):
             alter_exercise=original.alter_exercise
         )
 
-    if original_workout.image and original_workout.image.name != Config.objects.get(key="default_workout_image").value:
-        original_path = original_workout.image.path
-        file_name = os.path.basename(original_path)
-
-        new_folder = os.path.join(settings.MEDIA_ROOT, 'workout', str(duplicated_workout.id))
-        os.makedirs(new_folder, exist_ok=True)
-
-        new_file_path = os.path.join(new_folder, file_name)
-        shutil.copyfile(original_path, new_file_path)
-
-        relative_path = os.path.join('workout', str(duplicated_workout.id), file_name)
-        duplicated_workout.image = relative_path
-        duplicated_workout.save()
-    elif not original_workout.image:
-        duplicated_workout.image = Config.objects.get(key="default_workout_image").value
-        duplicated_workout.save()
-
     messages.success(request, "Trening został zduplikowany")
     return redirect('edit_training', id=duplicated_workout.id)
 
@@ -331,7 +313,6 @@ def show_training(request, id):
     workout = Workout.objects.get(id=id)
     workout_exercises = WorkoutExercise.objects.filter(workout=workout)
     feedback = Feedback.objects.filter(workout_exercise__workout=workout)
-
     return render(request, 'show_training.html', {'feedback': feedback,'training': workout, 'workout_exercises': workout_exercises})
 
 
@@ -346,9 +327,13 @@ def edit_training(request, id):
         post = request.POST
         workout.title = post.get('title', '')
         workout.visibility = post.get('visible-radio') == 'yes'
+        workout.is_personal = post.get('training-type') == 'personal'
 
         if workout.is_personal:
             workout.workout_date = parse_date(post.get('workout_date')) if workout.is_personal else None
+        else:
+            workout.workout_date = None
+            workout.client = None
 
         client_id = post.get('workout-person', None)
         workout.client = User.objects.get(id=client_id) if client_id else None
@@ -749,7 +734,3 @@ def logout_tunnel(request):
     logout(request)
     messages.info(request, "Zostałeś wylogowany")
     return redirect('login')
-
-
-def tmp(requset):
-    return render(requset, 'tmp.html')

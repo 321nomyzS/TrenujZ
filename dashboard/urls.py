@@ -26,5 +26,4 @@ urlpatterns = [
     path('tag/delete/<id>', views.delete_tag, name='delete_tag'),
     path('login', views.login_page, name='login'),
     path('logout', views.logout_tunnel, name='logout_tunnel'),
-    path('tmp', views.tmp, name='tmp'),
 ]
